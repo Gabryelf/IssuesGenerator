@@ -92,17 +92,29 @@ async function verifyCredentials() {
     }
 
     try {
-        const response = await fetch(`/api/verify-token?token=${encodeURIComponent(token)}&username=${encodeURIComponent(username)}&repo_name=${encodeURIComponent(repoName)}`);
+        console.log('Sending verification request...');
+        const apiUrl = `/api/verify-token?token=${encodeURIComponent(token)}&username=${encodeURIComponent(username)}&repo_name=${encodeURIComponent(repoName)}`;
+        console.log('API URL:', apiUrl);
+
+        const response = await fetch(apiUrl);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('Verification response:', data);
 
         if (data.valid && data.repo_exists) {
             document.getElementById('issue-section').style.display = 'block';
-            showResult('Credentials verified successfully!', 'success');
+            showResult('✅ Credentials verified successfully!', 'success');
         } else {
-            showResult('Invalid token or repository not found', 'error');
+            showResult('❌ Authentication failed: ' + data.message, 'error');
         }
     } catch (error) {
-        showResult('Error verifying credentials: ' + error.message, 'error');
+        console.error('Detailed error:', error);
+        showResult('❌ Error: ' + error.message, 'error');
     }
 }
 
