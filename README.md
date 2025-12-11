@@ -31,8 +31,8 @@
 
 **Advanced issue management with templates and repository cards**
 
-[![Live Demo](https://img.shields.io/badge/🎮-Live_Demo-238636?style=for-the-badge)](http://localhost:8000)
-[![API Docs](https://img.shields.io/badge/📚-API_Docs-009688?style=for-the-badge)](http://localhost:8000/docs)
+[![Live Demo](https://img.shields.io/badge/🎮-Live_Demo-238636?style=for-the-badge)]((https://issuesgenerator.onrender.com))
+[![API Docs](https://img.shields.io/badge/📚-API_Docs-009688?style=for-the-badge)]((https://issuesgenerator.onrender.com/docs))
 
 </div>
 
