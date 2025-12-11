@@ -3,86 +3,814 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Issues Creator</title>
+    <title>GitHub Issues Creator Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for the updated version */
+        .info-badge {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .keyboard-shortcut {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-left: 5px;
+        }
+
+        .help-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        #debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            z-index: 1000;
+            max-width: 400px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .debug-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debug-close:hover {
+            color: var(--text-primary);
+        }
+
+        .debug-section {
+            margin-bottom: 10px;
+        }
+
+        .debug-label {
+            color: var(--text-secondary);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .debug-value {
+            color: var(--primary-color);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 17, 23, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(35, 134, 54, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            max-width: 400px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .toast.info {
+            border-left: 4px solid #0d6efd;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>GitHub Issues Creator</h1>
-
-        <!-- Authentication Section -->
-        <div class="section">
-            <h2>GitHub Authentication</h2>
-            <div class="input-group">
-                <label for="username">GitHub Username:</label>
-                <input type="text" id="username" placeholder="your-username">
-            </div>
-            <div class="input-group">
-                <label for="repo-name">Repository Name:</label>
-                <input type="text" id="repo-name" placeholder="your-repo">
-            </div>
-            <div class="input-group">
-                <label for="token">GitHub Token:</label>
-                <input type="password" id="token" placeholder="ghp_...">
-                <small>Create token at: GitHub Settings → Developer settings → Personal access tokens</small>
-            </div>
-            <button onclick="verifyCredentials()" class="btn">Verify Credentials</button>
-        </div>
-
-        <!-- Issue Creation Section -->
-        <div class="section" id="issue-section" style="display: none;">
-            <h2>Create Issue</h2>
-
-            <!-- Issue Templates -->
-            <div class="input-group">
-                <label for="issue-template">Select Template:</label>
-                <select id="issue-template" onchange="loadTemplate()">
-                    <option value="">Custom</option>
-                    <option value="bug">Bug Report</option>
-                    <option value="feature">Feature Request</option>
-                    <option value="documentation">Documentation</option>
-                    <option value="enhancement">Enhancement</option>
-                </select>
-            </div>
-
-            <!-- Issue Title -->
-            <div class="input-group">
-                <label for="issue-title">Issue Title:</label>
-                <input type="text" id="issue-title" placeholder="Enter issue title">
-            </div>
-
-            <!-- Style Constructor -->
-            <div class="section">
-                <h3>Markdown Style Constructor</h3>
-                <div class="style-controls">
-                    <button onclick="applyStyle('bold')" class="style-btn">Bold</button>
-                    <button onclick="applyStyle('italic')" class="style-btn">Italic</button>
-                    <button onclick="applyStyle('code')" class="style-btn">Code</button>
-                    <button onclick="applyStyle('bullet')" class="style-btn">Bullet List</button>
-                    <button onclick="applyStyle('number')" class="style-btn">Numbered List</button>
-                    <button onclick="applyStyle('quote')" class="style-btn">Quote</button>
+        <header class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <h1><i class="fab fa-github"></i> GitHub Issues Creator Pro</h1>
+                    <p class="subtitle">Advanced issue management with templates and repository cards</p>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="showDebugPanel()" class="btn btn-sm" title="Debug Info">
+                        <i class="fas fa-bug"></i> Debug
+                    </button>
+                    <button onclick="showKeyboardShortcuts()" class="btn btn-sm" title="Keyboard Shortcuts">
+                        <i class="fas fa-keyboard"></i> Shortcuts
+                    </button>
+                    <button onclick="clearAllData()" class="btn btn-sm btn-outline" title="Clear All Data">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
                 </div>
             </div>
+        </header>
 
-            <!-- Issue Body -->
-            <div class="input-group">
-                <label for="issue-body">Issue Body (Markdown):</label>
-                <textarea id="issue-body" rows="10" placeholder="Describe your issue..."></textarea>
-            </div>
+        <div class="app-container">
+            <!-- Left Sidebar - Repository Cards -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fas fa-save"></i> Saved Repositories</h3>
+                        <button onclick="refreshRepositories()" class="btn btn-sm" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div id="saved-repos" class="repo-cards">
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>No saved repositories yet</p>
+                            <small>Connect to a repository and check "Save connection"</small>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Preview -->
-            <div class="section">
-                <h3>Preview</h3>
-                <div id="preview" class="preview"></div>
-            </div>
+                <div class="sidebar-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        <button onclick="clearActivity()" class="btn btn-sm" title="Clear Activity">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div id="activity-log" class="activity-log">
+                        <div class="activity-item">
+                            <div>Application started</div>
+                            <small>Just now</small>
+                        </div>
+                    </div>
+                </div>
 
-            <button onclick="createIssue()" class="btn btn-primary">Create Issue</button>
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-lightbulb"></i> Tips</h3>
+                    <div class="help-text">
+                        <p><strong>Save time:</strong> Use templates for common issue types</p>
+                        <p><strong>Quick access:</strong> Save repositories for faster connections</p>
+                        <p><strong>Keyboard shortcuts:</strong> Ctrl+Enter to create issue</p>
+                        <p><strong>Auto-save:</strong> Drafts are saved automatically every 30s</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Repository Connection Section -->
+                <section class="card" id="connection-section">
+                    <h2><i class="fas fa-plug"></i> Connect to Repository</h2>
+                    <p class="help-text" style="margin-bottom: 20px;">
+                        Enter your GitHub credentials to connect to a repository. Your token is stored only in memory and never sent to our servers.
+                    </p>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="username">
+                                GitHub Username
+                                <span class="info-badge">Required</span>
+                            </label>
+                            <input type="text" id="username" placeholder="your-username" class="form-input"
+                                   value="Gabryelf">
+                            <small class="form-hint">Your GitHub username (case-sensitive)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="repo-name">
+                                Repository Name
+                                <span class="info-badge">Required</span>
+                            </label>
+                            <input type="text" id="repo-name" placeholder="your-repo" class="form-input"
+                                   value="IssuesGenerator">
+                            <small class="form-hint">Name of the repository (case-sensitive)</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="token">
+                                GitHub Personal Access Token
+                                <span class="info-badge">Required</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <input type="password" id="token" placeholder="ghp_..." class="form-input">
+                                <button type="button" class="icon-btn" onclick="toggleTokenVisibility()" title="Show/Hide token">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-hint">
+                                <i class="fas fa-info-circle"></i> Create token at:
+                                <a href="https://github.com/settings/tokens" target="_blank" style="color: #58a6ff;">
+                                    GitHub Settings → Developer settings → Personal access tokens
+                                </a>
+                                <br>
+                                <i class="fas fa-shield-alt"></i> Required scopes: <code>repo</code>, <code>write:discussion</code>
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox">
+                            <input type="checkbox" id="save-to-redis" checked>
+                            <span class="checkmark"></span>
+                            <strong>Save connection for future use</strong>
+                            <span class="keyboard-shortcut">Recommended</span>
+                        </label>
+                        <small class="form-hint">
+                            <i class="fas fa-lock"></i> Your token will be encrypted and stored locally.
+                            You can delete saved repositories anytime from the sidebar.
+                        </small>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 30px;">
+                        <button onclick="verifyAndConnect()" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle"></i> Verify & Connect
+                        </button>
+                        <button onclick="testConnectionOnly()" class="btn btn-outline">
+                            <i class="fas fa-vial"></i> Test Connection Only
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Template Selection Section -->
+                <section class="card hidden" id="template-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-clipboard-list"></i> Choose Template</h2>
+                        <div>
+                            <span class="info-badge">
+                                Connected to: <strong id="connected-repo">-</strong>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="help-text" style="margin-bottom: 20px;">
+                        Select a template to get started. Templates provide structured formats for different types of issues.
+                    </p>
+
+                    <div class="template-grid" id="template-grid">
+                        <!-- Templates will be loaded here -->
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <div class="spinner" style="margin: 0 auto 20px;"></div>
+                            <p>Loading templates...</p>
+                        </div>
+                    </div>
+
+                    <div class="template-preview hidden" id="template-preview">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3><i class="fas fa-eye"></i> Template Preview</h3>
+                            <button onclick="hideTemplatePreview()" class="btn btn-sm">
+                                <i class="fas fa-times"></i> Hide
+                            </button>
+                        </div>
+                        <div id="template-preview-content"></div>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 30px;">
+                        <button onclick="goBackToConnection()" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Connection
+                        </button>
+                        <button onclick="useCustomTemplate()" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Create Custom Template
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Issue Creation Section -->
+                <section class="card hidden" id="issue-creation-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-plus-circle"></i> Create Issue</h2>
+                        <div>
+                            <span class="info-badge">
+                                <i class="fas fa-database"></i> Auto-save: <span id="draft-status">On</span>
+                            </span>
+                            <span class="info-badge" style="margin-left: 10px;">
+                                Template: <strong id="current-template">-</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issue-title">
+                            Issue Title
+                            <span class="info-badge">Required</span>
+                        </label>
+                        <input type="text" id="issue-title" class="form-input" placeholder="Enter a descriptive issue title">
+                        <small class="form-hint">Be specific and concise. Good titles help with search and organization.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issue-body">
+                            Issue Body (Markdown)
+                            <span class="info-badge">Required</span>
+                            <span class="keyboard-shortcut">Ctrl+Enter to submit</span>
+                        </label>
+
+                        <!-- Markdown Toolbar -->
+                        <div class="markdown-toolbar">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="font-size: 12px; color: var(--text-secondary); margin-right: 10px;">
+                                    <i class="fas fa-edit"></i> Format:
+                                </span>
+                                <button type="button" onclick="applyStyle('bold')" class="toolbar-btn" title="Bold (Ctrl+B)">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('italic')" class="toolbar-btn" title="Italic (Ctrl+I)">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('code')" class="toolbar-btn" title="Code">
+                                    <i class="fas fa-code"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('bullet')" class="toolbar-btn" title="Bullet List">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('number')" class="toolbar-btn" title="Numbered List">
+                                    <i class="fas fa-list-ol"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('quote')" class="toolbar-btn" title="Quote">
+                                    <i class="fas fa-quote-right"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('link')" class="toolbar-btn" title="Link">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                <button type="button" onclick="applyStyle('image')" class="toolbar-btn" title="Image">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="font-size: 12px; color: var(--text-secondary); margin-right: 10px;">
+                                    <i class="fas fa-magic"></i> Tools:
+                                </span>
+                                <button type="button" onclick="prefillExample()" class="toolbar-btn" title="Insert Example">
+                                    <i class="fas fa-magic"></i>
+                                </button>
+                                <button type="button" onclick="formatMarkdown()" class="toolbar-btn" title="Format Markdown">
+                                    <i class="fas fa-align-left"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <textarea id="issue-body" rows="12" class="form-textarea"
+                                  placeholder="Describe your issue in detail. Use Markdown for formatting..."></textarea>
+                        <small class="form-hint">
+                            <i class="fas fa-markdown"></i> Supports full Markdown syntax. Use {field_name} for template placeholders.
+                        </small>
+                    </div>
+
+                    <!-- Dynamic Template Fields -->
+                    <div id="template-fields" class="template-fields"></div>
+
+                    <!-- Preview Section -->
+                    <div class="preview-section">
+                        <div class="preview-header">
+                            <h3><i class="fas fa-eye"></i> Live Preview</h3>
+                            <div>
+                                <button type="button" onclick="refreshPreview()" class="btn btn-sm" title="Refresh Preview">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <button type="button" onclick="togglePreview()" class="btn btn-sm" title="Toggle Preview">
+                                    <i class="fas fa-eye-slash"></i> Hide
+                                </button>
+                            </div>
+                        </div>
+                        <div id="preview" class="preview">
+                            <p style="color: var(--text-secondary); text-align: center; padding: 40px;">
+                                Preview will appear here as you type
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" style="margin-top: 30px;">
+                        <button onclick="createIssue()" class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane"></i> Create Issue
+                            <span class="keyboard-shortcut">Ctrl+Enter</span>
+                        </button>
+                        <button onclick="saveAsDraft()" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> Save as Draft
+                            <span class="keyboard-shortcut">Ctrl+S</span>
+                        </button>
+                        <button onclick="loadDraft()" class="btn btn-outline">
+                            <i class="fas fa-folder-open"></i> Load Draft
+                        </button>
+                        <button onclick="clearForm()" class="btn btn-outline">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <div id="result" class="result hidden"></div>
+            </main>
         </div>
 
-        <!-- Results -->
-        <div id="result" class="result"></div>
+        <!-- Debug Panel -->
+        <div id="debug-panel" style="display: none;">
+            <div class="debug-header">
+                <h4 style="margin: 0;"><i class="fas fa-bug"></i> Debug Panel</h4>
+                <button class="debug-close" onclick="hideDebugPanel()">×</button>
+            </div>
+            <div class="debug-section">
+                <div><span class="debug-label">API Status:</span> <span class="debug-value" id="debug-api-status">Checking...</span></div>
+                <div><span class="debug-label">User:</span> <span class="debug-value" id="debug-user">Not connected</span></div>
+                <div><span class="debug-label">Repository:</span> <span class="debug-value" id="debug-repo">Not selected</span></div>
+                <div><span class="debug-label">Template:</span> <span class="debug-value" id="debug-template">None</span></div>
+            </div>
+            <div class="debug-section">
+                <button onclick="runDiagnostics()" class="btn btn-sm" style="width: 100%;">
+                    <i class="fas fa-stethoscope"></i> Run Diagnostics
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h3 id="loading-message">Processing...</h3>
+                <p style="color: var(--text-secondary); margin-top: 10px;" id="loading-details">Please wait</p>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Additional helper functions
+        function showDebugPanel() {
+            const panel = document.getElementById('debug-panel');
+            panel.style.display = 'block';
+            updateDebugInfo();
+        }
+
+        function hideDebugPanel() {
+            document.getElementById('debug-panel').style.display = 'none';
+        }
+
+        function updateDebugInfo() {
+            document.getElementById('debug-api-status').textContent = app ? 'Connected' : 'Disconnected';
+            document.getElementById('debug-user').textContent = app?.currentUser || 'Not connected';
+            document.getElementById('debug-repo').textContent = app?.currentRepository || 'Not selected';
+            document.getElementById('debug-template').textContent = app?.currentTemplate?.name || 'None';
+        }
+
+        function refreshRepositories() {
+            if (app && app.loadSavedRepositories) {
+                app.loadSavedRepositories();
+                showToast('Repositories refreshed', 'info');
+            }
+        }
+
+        function clearActivity() {
+            const activityLog = document.getElementById('activity-log');
+            if (activityLog) {
+                activityLog.innerHTML = '<div class="activity-item"><div>Activity log cleared</div><small>Just now</small></div>';
+                showToast('Activity log cleared', 'info');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear ALL local data (drafts, saved repositories, settings)? This cannot be undone.')) {
+                localStorage.clear();
+                if (app && app.loadSavedRepositories) {
+                    app.loadSavedRepositories();
+                }
+                showToast('All data cleared', 'info');
+            }
+        }
+
+        function showKeyboardShortcuts() {
+            const shortcuts = `
+                <strong>Keyboard Shortcuts:</strong>
+                <br><br>
+                <table style="width: 100%; font-size: 12px;">
+                    <tr>
+                        <td><span class="keyboard-shortcut">Ctrl+Enter</span></td>
+                        <td>Create issue</td>
+                    </tr>
+                    <tr>
+                        <td><span class="keyboard-shortcut">Ctrl+S</span></td>
+                        <td>Save draft</td>
+                    </tr>
+                    <tr>
+                        <td><span class="keyboard-shortcut">Ctrl+Shift+D</span></td>
+                        <td>Debug info</td>
+                    </tr>
+                    <tr>
+                        <td><span class="keyboard-shortcut">Esc</span></td>
+                        <td>Close modals</td>
+                    </tr>
+                </table>
+            `;
+            alert(shortcuts);
+        }
+
+        function testConnectionOnly() {
+            const username = document.getElementById('username').value.trim();
+            const repoName = document.getElementById('repo-name').value.trim();
+            const token = document.getElementById('token').value.trim();
+
+            if (!username || !repoName || !token) {
+                alert('Please fill all fields first');
+                return;
+            }
+
+            const url = `/api/verify-token?token=${encodeURIComponent(token)}&username=${encodeURIComponent(username)}&repo_name=${encodeURIComponent(repoName)}`;
+
+            showLoading('Testing connection...', 'Verifying GitHub credentials');
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.valid && data.repo_exists) {
+                        showToast('✅ Connection successful!', 'success');
+                        if (data.repo_data) {
+                            alert(`Connection successful!\n\nRepository: ${data.repo_data.full_name}\nDescription: ${data.repo_data.description || 'None'}\nPrivate: ${data.repo_data.private ? 'Yes' : 'No'}\nStars: ${data.repo_data.stars}\nOpen Issues: ${data.repo_data.open_issues}`);
+                        }
+                    } else {
+                        showToast(`❌ ${data.message || 'Connection failed'}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast(`❌ Error: ${error.message}`, 'error');
+                });
+        }
+
+        function goBackToConnection() {
+            document.getElementById('template-section').classList.add('hidden');
+            document.getElementById('issue-creation-section').classList.add('hidden');
+            document.getElementById('connection-section').classList.remove('hidden');
+        }
+
+        function useCustomTemplate() {
+            document.getElementById('issue-title').value = '';
+            document.getElementById('issue-body').value = '';
+
+            const fieldsContainer = document.getElementById('template-fields');
+            if (fieldsContainer) {
+                fieldsContainer.innerHTML = '';
+                fieldsContainer.classList.add('hidden');
+            }
+
+            document.getElementById('template-section').classList.add('hidden');
+            document.getElementById('issue-creation-section').classList.remove('hidden');
+
+            if (app) {
+                app.currentTemplate = { name: 'custom', title: '', labels: [] };
+                app.showResult('Using custom template', 'info');
+            }
+        }
+
+        function hideTemplatePreview() {
+            document.getElementById('template-preview').classList.add('hidden');
+        }
+
+        function togglePreview() {
+            const previewSection = document.querySelector('.preview-section');
+            const toggleBtn = document.querySelector('[onclick="togglePreview()"] i');
+
+            if (previewSection.style.display === 'none') {
+                previewSection.style.display = 'block';
+                toggleBtn.className = 'fas fa-eye-slash';
+                toggleBtn.parentElement.title = 'Hide Preview';
+            } else {
+                previewSection.style.display = 'none';
+                toggleBtn.className = 'fas fa-eye';
+                toggleBtn.parentElement.title = 'Show Preview';
+            }
+        }
+
+        function prefillExample() {
+            const example = `## Problem Description
+Briefly describe the issue you're experiencing.
+
+## Steps to Reproduce
+1. First step
+2. Second step
+3. Third step
+
+## Expected Behavior
+What should happen?
+
+## Actual Behavior
+What actually happens?
+
+## Environment
+- OS: [e.g., Windows 10]
+- Browser: [e.g., Chrome 90]
+- Version: [e.g., 1.2.3]
+
+## Additional Context
+Add any other context about the problem here.`;
+
+            document.getElementById('issue-body').value = example;
+            if (app) app.updatePreview();
+            showToast('Example content inserted', 'info');
+        }
+
+        function formatMarkdown() {
+            // Simple markdown formatting helper
+            const textarea = document.getElementById('issue-body');
+            const value = textarea.value;
+
+            // Add proper line breaks
+            let formatted = value
+                .replace(/\n{3,}/g, '\n\n')
+                .replace(/^#(?!\s)/gm, '# ')
+                .replace(/^##(?!\s)/gm, '## ')
+                .replace(/^###(?!\s)/gm, '### ');
+
+            textarea.value = formatted;
+            if (app) app.updatePreview();
+            showToast('Markdown formatted', 'info');
+        }
+
+        function loadDraft() {
+            if (app && app.loadDraft) {
+                app.loadDraft();
+            }
+        }
+
+        function showLoading(message = 'Loading...', details = '') {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-details').textContent = details;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="font-size: 20px;">
+                        ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
+                    </div>
+                    <div>${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function runDiagnostics() {
+            showLoading('Running diagnostics...', 'Checking API endpoints');
+
+            const endpoints = ['/api/test', '/api/templates', '/health'];
+            let results = [];
+
+            Promise.all(endpoints.map(endpoint =>
+                fetch(endpoint)
+                    .then(res => ({ endpoint, status: res.status, ok: res.ok }))
+                    .catch(err => ({ endpoint, error: err.message }))
+            )).then(diagnostics => {
+                hideLoading();
+
+                let message = '<strong>Diagnostic Results:</strong><br><br>';
+                diagnostics.forEach(d => {
+                    if (d.error) {
+                        message += `❌ ${d.endpoint}: ${d.error}<br>`;
+                    } else if (d.ok) {
+                        message += `✅ ${d.endpoint}: HTTP ${d.status}<br>`;
+                    } else {
+                        message += `⚠️ ${d.endpoint}: HTTP ${d.status}<br>`;
+                    }
+                });
+
+                alert(message);
+            });
+        }
+
+        // Initialize connected repo display
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update connected repo when connection is made
+            const originalVerify = window.verifyAndConnect;
+            window.verifyAndConnect = function() {
+                if (originalVerify) originalVerify();
+                const username = document.getElementById('username').value;
+                const repoName = document.getElementById('repo-name').value;
+                document.getElementById('connected-repo').textContent = `${username}/${repoName}`;
+            };
+
+            // Update current template display
+            const originalSelectTemplate = window.selectTemplate;
+            window.selectTemplate = function(name) {
+                if (originalSelectTemplate) originalSelectTemplate(name);
+                document.getElementById('current-template').textContent = name;
+            };
+
+            // Auto-update debug panel every 5 seconds when visible
+            setInterval(() => {
+                if (document.getElementById('debug-panel').style.display === 'block') {
+                    updateDebugInfo();
+                }
+            }, 5000);
+        });
+
+        // Keyboard shortcuts for new functions
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideDebugPanel();
+                const loading = document.getElementById('loading-overlay');
+                if (loading.style.display === 'flex') {
+                    loading.style.display = 'none';
+                }
+            }
+
+            // Debug panel shortcut
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                showDebugPanel();
+            }
+        });
+    </script>
 </body>
 </html>
