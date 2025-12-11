@@ -1,4 +1,4 @@
-# GitHub Issues Creator Pro 🚀
+# ✨❤️ GitHub Issues Creator Pro ❤️✨
 
 <div align="center">
 
@@ -6,6 +6,28 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python)
+
+## 📸 Screenshots
+
+<div align="center">
+
+### **Main Interface**
+![Main Interface](docs/screens/v.001_v.002/2025-12-11_23-22-32.png)  
+*Clean dark theme with repository cards and activity log*
+
+### **Template Selection**
+![Templates](docs/screens/v.001_v.002/2025-12-11_23-24-17.png)  
+*Pre-built templates for different issue types*
+
+### **Issue Creation**
+![Create Issue](docs/screens/v.001_v.002/2025-12-11_23-27-02.png)  
+*Markdown editor with live preview and formatting tools*
+
+### **API Documentation**
+![API Docs](docs/screens/v.001_v.002/2025-12-12_00-04-16.png)  
+*Interactive Swagger UI for API exploration*
+
+</div>
 
 **Advanced issue management with templates and repository cards**
 
@@ -54,27 +76,6 @@ python main.py
 
 📡 **Server starts at:** `http://localhost:8000`
 
-## 📸 Screenshots
-
-<div align="center">
-
-### **Main Interface**
-![Main Interface](docs/screens/v.001_v.002/2025-12-11_23-22-32.png)  
-*Clean dark theme with repository cards and activity log*
-
-### **Template Selection**
-![Templates](docs/screens/v.001_v.002/2025-12-11_23-24-17.png)  
-*Pre-built templates for different issue types*
-
-### **Issue Creation**
-![Create Issue](docs/screens/v.001_v.002/2025-12-11_23-27-02.png)  
-*Markdown editor with live preview and formatting tools*
-
-### **API Documentation**
-![API Docs](docs/screens/v.001_v.002/2025-12-12_00-04-16.png)  
-*Interactive Swagger UI for API exploration*
-
-</div>
 
 ## 🔧 API Endpoints
 
